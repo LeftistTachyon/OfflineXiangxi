@@ -1,6 +1,6 @@
 # OfflineXiangxi
 An offline version of Xiangxi. Going to be used to create an AI.
 
-##TODO  
+## TODO  
  [ ] Initial logic
  [ ] Add javadoc
