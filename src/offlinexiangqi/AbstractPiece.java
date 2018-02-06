@@ -74,13 +74,9 @@ public abstract class AbstractPiece {
         }
         for(String square:allLegal) {
             xb.maybeMove(currentPosition, square);
-            if(getCharRepresentation().equals("P") && 
-                    (XiangqiBoard.getRow(square) == 0 
-                    || XiangqiBoard.getRow(square) == 7)) 
-                xb.placePiece(new Queen(isRed), square);
             if(!xb.inCheck(isRed)) output.add(square);
             xb.setBoard(initLayout);
-            if(getCharRepresentation().equals("K")) xb.resetKingPos(isRed);
+            if(getCharRepresentation().equals("G")) xb.resetGeneralPos(isRed);
         }
         return output;
     }
