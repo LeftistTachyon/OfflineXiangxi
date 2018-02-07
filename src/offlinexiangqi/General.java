@@ -2,7 +2,6 @@ package offlinexiangqi;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import javax.imageio.ImageIO;
@@ -12,7 +11,6 @@ import javax.imageio.ImageIO;
  * @author Jed Wang
  */
 public class General extends AbstractPiece {
-
     /**
      * A constructor that creates a new General.
      * @param isRed whether the General is red
@@ -23,7 +21,34 @@ public class General extends AbstractPiece {
     
     @Override
     public LinkedList<String> allLegalMoves(XiangqiBoard xb, String currentPosition) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        LinkedList<String> output = new LinkedList<>();
+        String shift;
+        if(XiangqiBoard.isValidShift(currentPosition, 0, -1)) {
+            shift = XiangqiBoard.shiftSquare(currentPosition, 0, -1);
+            if(XiangqiBoard.getColumn(shift) >= 3 && XiangqiBoard.getColumn(shift) <= 5) {
+                if((isRed && XiangqiBoard.getRow(shift) >= 7 && XiangqiBoard.getRow(shift) <= 9) || 
+                        (!isRed && XiangqiBoard.getRow(shift) >= 0 && XiangqiBoard.getRow(shift) <= 2)) {
+                    output.add(shift);
+                }
+            }
+        }
+        return output;
+    }
+    
+    /**
+     * Determines whether a square is inside a colored fortress
+     * @param square the square to check
+     * @param isRed whether the fortress is red or not
+     * @return whether the square is inside a fortress
+     */
+    public static boolean insideFortress(String square, boolean isRed) {
+        if(XiangqiBoard.getColumn(square) < 3 || XiangqiBoard.getColumn(square) > 5) 
+            return false;
+        if(isRed) {
+            return XiangqiBoard.getRow(square) >= 7 && XiangqiBoard.getRow(square) <= 9;
+        } else {
+            return XiangqiBoard.getRow(square) >= 0 && XiangqiBoard.getRow(square) <= 2;
+        }
     }
 
     @Override
@@ -37,12 +62,12 @@ public class General extends AbstractPiece {
     }
     
     /**
-     * static init
+     * init
      */
-    static {
+    {
         try {
-            black = ImageIO.read(new File("../images/bk.gif"));
-            red = ImageIO.read(new File("../images/rk.gif"));
+            black = ImageIO.read(getClass().getResource("/images/bk.gif"));
+            red = ImageIO.read(getClass().getResource("/images/rk.gif"));
         } catch (IOException ex) {
             ex.printStackTrace();
         }

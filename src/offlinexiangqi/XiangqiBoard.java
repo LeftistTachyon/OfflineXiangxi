@@ -170,6 +170,35 @@ public class XiangqiBoard {
         } else throw new IllegalArgumentException("Invalid square");
     }
     
+    /**
+     * Checks if a shift is valid
+     * @param col current column
+     * @param row current row
+     * @param colShift how much to shift the columns
+     * @param rowShift how much to shift the rows
+     * @return whether the shift is valid
+     */
+    public static boolean isValidShift(int col, int row, int colShift, int rowShift) {
+        if(isValidSquare(col, row)) {
+            int shiftedCol = col + colShift, shiftedRow = row + rowShift;
+            return isValidSquare(shiftedCol, shiftedRow);
+        } else return false;
+    }
+    
+    /**
+     * Checks if this shift is valid
+     * @param s current square
+     * @param colShift how much to shift the columns
+     * @param rowShift how much to shift the rows
+     * @return whether the shift is valid
+     */
+    public static boolean isValidShift(String s, int colShift, int rowShift) {
+        return isValidShift(
+                XiangqiBoard.getColumn(s), XiangqiBoard.getRow(s), 
+                colShift, rowShift
+        );
+    }
+    
     
     /**
      * Determines which piece occupies a square
@@ -314,32 +343,32 @@ public class XiangqiBoard {
      * Refinds both kings.
      */
     public void resetGeneralPos() {
-        String bKing = null, wKing = null;
+        String bGeneral = null, rGeneral = null;
         OUTER: for(int i = 0; i < board.length; i++) {
             for(int j = 0; j < board[i].length; j++) {
                 if(board[i][j] == null) continue;
-                if(board[i][j].getCharRepresentation().equals("K")) {
+                if(board[i][j].getCharRepresentation().equals("G")) {
                     if(board[i][j].isRed) {
-                        if(wKing == null) {
-                            wKing = toSquare(i, j);
+                        if(rGeneral == null) {
+                            rGeneral = toSquare(i, j);
                         } else {
-                            assert false : "There are two white kings?!";
+                            assert false : "There are two red generals?!";
                         }
                     } else {
-                        if(bKing == null) {
-                            bKing = toSquare(i, j);
+                        if(bGeneral == null) {
+                            bGeneral = toSquare(i, j);
                         } else {
-                            assert false : "There are two black kings?!";
+                            assert false : "There are two black generals?!";
                         }
                     }
-                    if(wKing != null && bKing != null) break OUTER;
+                    if(rGeneral != null && bGeneral != null) break OUTER;
                 }
             }
         }
-        if(wKing == null) assert false : "Cannot find white king";
-        if(bKing == null) assert false : "Cannot find black king";
-        generalPos.put(true, wKing);
-        generalPos.put(false, bKing);
+        if(rGeneral == null) assert false : "Cannot find red general";
+        if(bGeneral == null) assert false : "Cannot find black general";
+        generalPos.put(true, rGeneral);
+        generalPos.put(false, bGeneral);
     }
     
     /**
@@ -350,7 +379,7 @@ public class XiangqiBoard {
         for(int i = 0; i < board.length; i++) {
             for(int j = 0; j < board[i].length; j++) {
                 if(board[i][j] == null) continue;
-                if(board[i][j].getCharRepresentation().equals("K") && (board[i][j].isRed == isRed)) {
+                if(board[i][j].getCharRepresentation().equals("G") && (board[i][j].isRed == isRed)) {
                     generalPos.put(isRed, toSquare(i, j));
                     return;
                 }
@@ -389,7 +418,11 @@ public class XiangqiBoard {
                 AbstractPiece ap = board[j][i];
                 if(ap == null) {
                     System.out.print(" ");
-                } else System.out.print(ap.getCharRepresentation());
+                } else if(ap.isRed) {
+                    System.out.print(ap.getCharRepresentation());
+                } else {
+                    System.out.print(ap.getCharRepresentation().toLowerCase());
+                }
             }
             System.out.println();
         }

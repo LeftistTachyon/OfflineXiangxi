@@ -101,9 +101,15 @@ public abstract class AbstractPiece {
         float[] scales = { 1f, 1f, 1f, 0.3f };
         float[] offsets = new float[4];
         rop = new RescaleOp(scales, offsets, null);
+    }
+    
+    /**
+     * init
+     */
+    {
         try {
-            black = ImageIO.read(new File("../images/bk.gif"));
-            red = ImageIO.read(new File("../images/rk.gif"));
+            black = ImageIO.read(getClass().getResource("/images/bk.gif"));
+            red = ImageIO.read(getClass().getResource("/images/rk.gif"));
         } catch (IOException ex) {
             ex.printStackTrace();
         }

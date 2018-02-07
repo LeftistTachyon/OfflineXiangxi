@@ -2,7 +2,6 @@ package offlinexiangqi;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import javax.imageio.ImageIO;
@@ -37,12 +36,12 @@ public class Horse extends AbstractPiece {
     }
     
     /**
-     * static init
+     * init
      */
-    static {
+    {
         try {
-            black = ImageIO.read(new File("../images/bn.gif"));
-            red = ImageIO.read(new File("../images/rn.gif"));
+            black = ImageIO.read(getClass().getResource("/images/bn.gif"));
+            red = ImageIO.read(getClass().getResource("/images/rn.gif"));
         } catch (IOException ex) {
             ex.printStackTrace();
         }

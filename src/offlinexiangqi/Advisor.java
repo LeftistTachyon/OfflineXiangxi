@@ -2,7 +2,6 @@ package offlinexiangqi;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import javax.imageio.ImageIO;
@@ -37,12 +36,12 @@ public class Advisor extends AbstractPiece {
     }
     
     /**
-     * static init
+     * init
      */
-    static {
+    {
         try {
-            black = ImageIO.read(new File("../images/ba.gif"));
-            red = ImageIO.read(new File("../images/ra.gif"));
+            black = ImageIO.read(getClass().getResource("/images/ba.gif"));
+            red = ImageIO.read(getClass().getResource("/images/ra.gif"));
         } catch (IOException ex) {
             ex.printStackTrace();
         }

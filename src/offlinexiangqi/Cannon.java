@@ -2,7 +2,6 @@ package offlinexiangqi;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import javax.imageio.ImageIO;
@@ -37,12 +36,12 @@ public class Cannon extends AbstractPiece {
     }
     
     /**
-     * static init
+     * init
      */
-    static {
+    {
         try {
-            black = ImageIO.read(new File("../images/bc.gif"));
-            red = ImageIO.read(new File("../images/rc.gif"));
+            black = ImageIO.read(getClass().getResource("/images/bc.gif"));
+            red = ImageIO.read(getClass().getResource("/images/rc.gif"));
         } catch (IOException ex) {
             ex.printStackTrace();
         }
