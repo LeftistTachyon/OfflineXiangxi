@@ -1,9 +1,18 @@
 package offlinexiangqi;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.RadialGradientPaint;
+import java.awt.RenderingHints;
+import java.awt.geom.Ellipse2D;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 /**
- * A class that represents a Xiangxi board
+ * A class that represents a Xiangqi board
  * @author Jed Wang
  */
 public class XiangqiBoard {
@@ -13,7 +22,7 @@ public class XiangqiBoard {
     private AbstractPiece[][] board;
     
     /**
-     * Whether the player this board is facing is white
+     * Whether the player this board is facing is red
      */
     private boolean playerIsRed = true;
     
@@ -23,12 +32,96 @@ public class XiangqiBoard {
     private HashMap<Boolean, String> generalPos;
     
     /**
+     * Coordinates of the top left corner
+     */
+    private int x, y;
+    
+    /**
+     * The last move by a piece.<br>
+     * Controls drawing the last move
+     */
+    private String lastMoveFrom = null, lastMoveTo = null;
+    
+    /**
+     * The piece's square to be dragging from.<br>
+     * Controls dragging pieces
+     */
+    private String draggingFrom = null;
+    
+    /**
+     * The piece's square to be dragging from.<br>
+     * Controls playing around with pieces
+     */
+    private String fakeDraggingFrom = null;
+    
+    /**
+     * The last known non-null point the mouse was at.<br>
+     * Controls dragging pieces
+     */
+    private Point lastPoint;
+    
+    /**
+     * From which perspective the board is to be drawn.
+     */
+    private boolean fromPerspective = true;
+    
+    /**
+     * Which side this player can move pieces for.<br>
+     * 0 == WHITE<br>
+     * 1 == BLACK<br>
+     * 2 == BOTH
+     */
+    private int manipulable = 1;
+    
+    /**
+     * The selected square
+     */
+    private String selected = null;
+    
+    /**
+     * A Map of all of the legal moves possible
+     */
+    private HashMap<String, LinkedList<String>> allLegalMoves;
+    
+    /**
+     * The size of the individual xiangqi squares.
+     */
+    public static final int SQUARE_SIZE = 57;
+    
+    /**
+     * The offset to the center needed for a 13-diameter circle
+     */
+    public static final int CENTER_OFFSET = (SQUARE_SIZE-13)/2;
+    
+    /**
+     * The sizes of the triangles that surround a piece that can be captured
+     */
+    public static final int TRIANGLE_SIZE = (int) ((11.0/51)*SQUARE_SIZE);
+    
+    /**
+     * A number which represents Red is manipulable.
+     */
+    public static final int WHITE_MANIPULABLE = 0;
+    
+    /**
+     * A number which represents Black is manipulable.
+     */
+    public static final int BLACK_MANIPULABLE = 1;
+    
+    /**
+     * A number which represents both sides is manipulable.
+     */
+    public static final int BOTH_MANIPULABLE = 2;
+    
+    /**
      * Default constructor.
      */
     public XiangqiBoard() {
         board = new AbstractPiece[9][10];
-        initPieces();
         generalPos = new HashMap<>();
+        initPieces();
+        allLegalMoves = new HashMap<>();
+        x = y = 0;
     }
     
     /**
@@ -72,10 +165,250 @@ public class XiangqiBoard {
         board[4][6] = new Pawn(true);
         board[6][6] = new Pawn(true);
         board[8][6] = new Pawn(true);
+        
+        generalPos.put(true, "e1");
+        generalPos.put(false, "e10");
     }
     
     /**
-     * Constructor from a previous ChessBoard
+     * Draws the current state of the chess board
+     * @param g Graphics to draw on
+     */
+    public void draw(Graphics g) {
+        Point temp = XiangqiPanel.getMouseCoordinates();
+        if(temp != null) 
+            lastPoint = temp;
+        
+        Graphics2D g2D = (Graphics2D) g;
+        g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        drawCheckers(g2D);
+        drawCheck(g2D);
+        drawSelection(g2D);
+        drawPieces(g2D);
+        drawDraggedPiece(g2D);
+    }
+    
+    /**
+     * Draws the checkered pattern
+     * @param g2D Graphics2D to draw on
+     */
+    private void drawCheckers(Graphics2D g2D) {
+        g2D.setColor(new Color(181, 136, 99));
+        g2D.fillRect(x, y, 9*SQUARE_SIZE, 10*SQUARE_SIZE);
+        g2D.setColor(new Color(240, 217, 181));
+        for(int i = x;i<9*SQUARE_SIZE+x;i+=SQUARE_SIZE*2) {
+            for(int j = y;j<10*SQUARE_SIZE+y;j+=SQUARE_SIZE*2) {
+                g2D.fillRect(i, j, SQUARE_SIZE, SQUARE_SIZE);
+            }
+        }
+        for(int i = x+SQUARE_SIZE;i<9*SQUARE_SIZE+x;i+=SQUARE_SIZE*2) {
+            for(int j = y+SQUARE_SIZE;j<10*SQUARE_SIZE+y;j+=SQUARE_SIZE*2) {
+                g2D.fillRect(i, j, SQUARE_SIZE, SQUARE_SIZE);
+            }
+        }
+        g2D.setColor(new Color(155, 199, 0, 105));
+        if(lastMoveFrom != null) {
+            if(fromPerspective) {
+                g2D.fillRect(getColumn(lastMoveFrom)*SQUARE_SIZE+x, 
+                        getRow(lastMoveFrom)*SQUARE_SIZE+y, 
+                        SQUARE_SIZE, SQUARE_SIZE);
+            } else {
+                g2D.fillRect((9-getColumn(lastMoveFrom))*SQUARE_SIZE+x, 
+                        (9-getRow(lastMoveFrom))*SQUARE_SIZE+y, 
+                        SQUARE_SIZE, SQUARE_SIZE);
+            }
+        }
+        if(lastMoveTo != null) {
+            if(fromPerspective) {
+                g2D.fillRect(getColumn(lastMoveTo)*SQUARE_SIZE+x, 
+                        getRow(lastMoveTo)*SQUARE_SIZE+y, 
+                        SQUARE_SIZE, SQUARE_SIZE);
+            } else {
+                g2D.fillRect((9-getColumn(lastMoveTo))*SQUARE_SIZE+x, 
+                        (9-getRow(lastMoveTo))*SQUARE_SIZE+y, 
+                        SQUARE_SIZE, SQUARE_SIZE);
+            }
+        }
+        
+        g2D.setPaint(Color.BLACK);
+        g2D.setFont(new Font("Century Gothic", 0, 12)); // NOI18N
+        if(fromPerspective) {
+            int i = 0;
+            for (; i < 9; i++) {
+                g2D.drawString((char) ('a' + i) + "",
+                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) - 3 + x, 
+                        SQUARE_SIZE * 10 + 12 + y);
+                g2D.drawString((10 - i) + "", SQUARE_SIZE * 9 + 3 + x,
+                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6 + y);
+            }
+            g2D.drawString((10 - i) + "", SQUARE_SIZE * 9 + 3 + x,
+                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6 + y);
+        } else {
+            int i = 0;
+            for (; i < 9; i++) {
+                g2D.drawString((char) ('a' + 9 - i) + "",
+                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) - 3 + x, 
+                        SQUARE_SIZE * 10 + 12 + y);
+                g2D.drawString((i + 1) + "", SQUARE_SIZE * 9 + 3 + x,
+                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6 + y);
+            }
+            g2D.drawString((i + 1) + "", SQUARE_SIZE * 9 + 3 + x,
+                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6 + y);
+        }
+    }
+    
+    /**
+     * Draws the pieces on the board.
+     * @param g2D Graphics2D to draw on
+     */
+    private void drawPieces(Graphics2D g2D) {
+        for (int i = 0; i < board.length; ++i) {
+            for (int j = 0; j < board[i].length; ++j) {
+                if (board[i][j] != null) {
+                    if (toSquare(i, j).equals(draggingFrom) || toSquare(i, j).equals(fakeDraggingFrom)) {
+                        if(fromPerspective) {
+                            board[i][j].drawGhost(g2D, (i * SQUARE_SIZE) + x, 
+                                    (j * SQUARE_SIZE) + y, SQUARE_SIZE, SQUARE_SIZE);
+                        } else {
+                            board[i][j].drawGhost(g2D, ((9-i) * SQUARE_SIZE) + x, 
+                                    ((9-j) * SQUARE_SIZE)+ y, SQUARE_SIZE, SQUARE_SIZE);
+                        }
+                    } else {
+                        if(fromPerspective) {
+                            board[i][j].draw(g2D, (i * SQUARE_SIZE) + x, 
+                                    (j * SQUARE_SIZE) + y, SQUARE_SIZE, SQUARE_SIZE);
+                        } else {
+                            board[i][j].draw(g2D, ((9-i) * SQUARE_SIZE) + x, 
+                                    ((9-j) * SQUARE_SIZE) + y, SQUARE_SIZE, SQUARE_SIZE);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Draws the selected pieces
+     * @param g2D Graphics2D to draw on
+     */
+    private void drawSelection(Graphics2D g2D) {
+        String selection;
+        if(draggingFrom == null) {
+            if(selected == null) {
+                return;
+            } else selection = selected;
+        } else selection = draggingFrom;
+        LinkedList<String> moves = allLegalMoves.get(selection);
+        if(moves == null) return;
+        Color moveDest = new Color(20, 85, 30, 77);
+        g2D.setColor(moveDest);
+        final Point p = XiangqiPanel.getMouseCoordinates();
+        //System.out.println((p == null)?"null":"(" + p.x + ", " + p.y + ")");
+        for(String s:moves) {
+            int x1 = XiangqiBoard.getColumn(s), 
+                    y1 = XiangqiBoard.getRow(s);
+            int x2 = x1, y2 = y1;
+            if(!fromPerspective) {
+                x2 = 7 - x1;
+                y2 = 7 - y1;
+            }
+            
+            if(p != null) {
+                if(isEmptySquare(x1, y1) && 
+                        (p.x >= x+x2*SQUARE_SIZE && p.x <= x+x2*SQUARE_SIZE+SQUARE_SIZE) && 
+                        (p.y >= y+y2*SQUARE_SIZE && p.y <= y+y2*SQUARE_SIZE+SQUARE_SIZE)) {
+                    g2D.fillRect(x+x2*SQUARE_SIZE, y+y2*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+                    continue;
+                }
+            }
+            if(isEmptySquare(x1, y1)) {
+                g2D.fillOval(x+x2*SQUARE_SIZE+CENTER_OFFSET, y+y2*SQUARE_SIZE+CENTER_OFFSET, 14, 14);
+            } else {
+                /*
+                1___2
+                 | |
+                4---3
+                */
+                Point one = new Point(x+x2*SQUARE_SIZE, y+y2*SQUARE_SIZE), 
+                        two = new Point(x+x2*SQUARE_SIZE + SQUARE_SIZE, y+y2*SQUARE_SIZE), 
+                        three = new Point(x+x2*SQUARE_SIZE + SQUARE_SIZE, y+y2*SQUARE_SIZE + SQUARE_SIZE), 
+                        four = new Point(x+x2*SQUARE_SIZE, y+y2*SQUARE_SIZE + SQUARE_SIZE);
+                
+                g2D.fillPolygon(new int[]{one.x, one.x, one.x+TRIANGLE_SIZE}, 
+                        new int[]{one.y, one.y+TRIANGLE_SIZE, one.y}, 3); // 1
+                g2D.fillPolygon(new int[]{two.x, two.x, two.x-TRIANGLE_SIZE}, 
+                        new int[]{two.y, two.y+TRIANGLE_SIZE, two.y}, 3); // 2
+                g2D.fillPolygon(new int[]{three.x, three.x, three.x-TRIANGLE_SIZE}, 
+                        new int[]{three.y, three.y-TRIANGLE_SIZE, three.y}, 3); // 3
+                g2D.fillPolygon(new int[]{four.x, four.x, four.x+TRIANGLE_SIZE}, 
+                        new int[]{four.y, four.y-TRIANGLE_SIZE, four.y}, 3); // 4
+            }
+        }
+        Color selectionColor = new Color(20, 85, 30, 128);
+        g2D.setColor(selectionColor);
+        if(fromPerspective) {
+            g2D.fillRect(x+XiangqiBoard.getColumn(selection)*SQUARE_SIZE, 
+                    y+XiangqiBoard.getRow(selection)*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        } else {
+            g2D.fillRect(x+(7-XiangqiBoard.getColumn(selection))*SQUARE_SIZE, 
+                    y+(7-XiangqiBoard.getRow(selection))*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        }
+    }
+    
+    /**
+     * Draws whether either king is in check
+     * @param g2D the Graphics2D to draw on
+     */
+    private void drawCheck(Graphics2D g2D) {
+        float[] fractions = new float[]{ 0.0f, 0.25f, 0.89f, 1.0f };
+        Color[] colors = new Color[]{
+            new Color(255, 0, 0, 255), new Color(231, 0, 0, 255), 
+            new Color(169, 0, 0, 0), new Color(158, 0, 0, 0)
+        };
+        if(inCheck(playerIsRed)) {
+            String generalAt = generalPos.get(playerIsRed);
+            int col = getColumn(generalAt), row = getRow(generalAt);
+            if(!fromPerspective) {
+                col = 7 - col;
+                row = 7 - row;
+            }
+            g2D.setPaint(
+                    new RadialGradientPaint(
+                            (SQUARE_SIZE/2) + (col*SQUARE_SIZE) + x, 
+                            (SQUARE_SIZE/2) + (row*SQUARE_SIZE) + y, 
+                            SQUARE_SIZE*7/12, fractions, colors
+                    )
+            );
+            g2D.fill(
+                    new Ellipse2D.Double(
+                            col*SQUARE_SIZE + x, 
+                            row*SQUARE_SIZE + y, 
+                            SQUARE_SIZE, SQUARE_SIZE
+                    )
+            );
+        }
+    }
+    
+    /**
+     * Draws the dragged piece
+     * @param g2D the Graphics2D to draw on
+     */
+    private void drawDraggedPiece(Graphics2D g2D) {
+        if(fakeDraggingFrom != null) {
+            int midX = lastPoint.x - (SQUARE_SIZE/2), 
+                midY = lastPoint.y - (SQUARE_SIZE/2);
+            getPiece(fakeDraggingFrom).draw(g2D, midX, midY, SQUARE_SIZE, SQUARE_SIZE);
+        }
+        if(draggingFrom != null) {
+            int midX = lastPoint.x - (SQUARE_SIZE/2), 
+                midY = lastPoint.y - (SQUARE_SIZE/2);
+            getPiece(draggingFrom).draw(g2D, midX, midY, SQUARE_SIZE, SQUARE_SIZE);
+        }
+    }
+    
+    /**
+     * Constructor from a previous XiangqiBoard
      * @param xb the XiangqiBoard to duplicate
      */
     public XiangqiBoard(XiangqiBoard xb) {
@@ -93,6 +426,23 @@ public class XiangqiBoard {
      */
     public static String toSquare(int column, int row) {
         return "" + (char)('a' + column) + (10 - row);
+    }
+    
+    /**
+     * Recalculates all of the moves on a square
+     */
+    public void recalculateMoves() {
+        allLegalMoves = new HashMap<>();
+        for(int i = 0; i < board.length; i++) {
+            for(int j = 0; j < board[i].length; j++) {
+                if(board[i][j] == null) continue;
+                if(board[i][j].isRed == playerIsRed) {
+                    String current = XiangqiBoard.toSquare(i, j);
+                    LinkedList<String> moves = board[i][j].legalMoves(this, current);
+                    allLegalMoves.put(current, moves);
+                }
+            }
+        }
     }
     
     /**
@@ -225,6 +575,25 @@ public class XiangqiBoard {
     }
     
     /**
+     * Determines whether a square is empty
+     * @param square a square
+     * @return whether that square is empty
+     */
+    public boolean isEmptySquare(String square) {
+        return getPiece(square) == null;
+    }
+    
+    /**
+     * Determines whether a space represented by ABSOLUTE coordinates is empty
+     * @param col the ABSOLUTE column
+     * @param row the ABSOLUTE row
+     * @return whether that square is empty
+     */
+    public boolean isEmptySquare(int col, int row) {
+        return getPiece(col, row) == null;
+    }
+    
+    /**
      * Determines the validity of the square
      * @param s a square
      * @return whether the square is valid
@@ -260,18 +629,18 @@ public class XiangqiBoard {
     
     /**
      * Determines whether one side's general is in check
-     * @param isWhite whether the side to check is white (PUN INTENDED)
+     * @param isRed whether the side to check is red (PUN INTENDED)
      * @return whether the side is in check
      */
-    public boolean inCheck(boolean isWhite) {
+    public boolean inCheck(boolean isRed) {
         for(int i = 0;i<8;i++) {
             for(int j = 0;j<8;j++) {
                 AbstractPiece ap = getPiece(i, j);//lit dude lit
                 if(ap != null) {
-                    if(ap.isRed ^ isWhite) {
+                    if(ap.isRed ^ isRed) {
                         //if(ap.legalCaptures(this, XiangqiBoard.toSquare(i, j)).contains(generalPos))
                         // if the current opposite-colored piece can eat the king on the next move
-                        if(ap.isAllLegalMove(this, XiangqiBoard.toSquare(i, j), generalPos.get(isWhite))) {
+                        if(ap.isAllLegalMove(this, XiangqiBoard.toSquare(i, j), generalPos.get(isRed))) {
                             return true;
                         }
                     }
@@ -303,11 +672,10 @@ public class XiangqiBoard {
      * @param toWhereY where to move a piece
      */
     public void movePiece(int fromWhereX, int fromWhereY, int toWhereX, int toWhereY) {
-        XiangqiBoard thisCopy = new XiangqiBoard(this);
         maybeMove(fromWhereX, fromWhereY, toWhereX, toWhereY);
         System.out.println("Moved: " + playerIsRed);
         playerIsRed = !playerIsRed;
-        //recalculateMoves();
+        recalculateMoves();
         //updatePos(miniFEN());
         /*if(checkMated(playerIsRed)) System.out.println("Checkmate!\n");
         else if(inCheck(playerIsRed)) {
@@ -372,6 +740,40 @@ public class XiangqiBoard {
     }
     
     /**
+     * Determines whether a square is inside a colored fortress
+     * @param square the square to check
+     * @param isRed whether the fortress is red or not
+     * @return whether the square is inside a fortress
+     */
+    public static boolean insideFortress(String square, boolean isRed) {
+        if(isValidSquare(square)) {
+            if(XiangqiBoard.getColumn(square) < 3 || XiangqiBoard.getColumn(square) > 5) 
+                return false;
+            if(isRed) {
+                return XiangqiBoard.getRow(square) >= 7 && XiangqiBoard.getRow(square) <= 9;
+            } else {
+                return XiangqiBoard.getRow(square) >= 0 && XiangqiBoard.getRow(square) <= 2;
+            }
+        } else throw new IllegalArgumentException("Invalid square");
+    }
+    
+    /**
+     * Determines whether a piece is behind the river
+     * @param square the square the piece is on
+     * @param isRed whether the piece is red or black
+     * @return whether the piece is behind the river
+     */
+    public static boolean behindRiver(String square, boolean isRed) {
+        if(isValidSquare(square)) {
+            if(isRed) {
+                return getRow(square) <= 4;
+            } else {
+                return getRow(square) >= 5;
+            }
+        } else throw new IllegalArgumentException("Invalid square");
+    }
+    
+    /**
      * Refinds only one king.
      * @param isRed whether the king to find again is red
      */
@@ -385,6 +787,128 @@ public class XiangqiBoard {
                 }
             }
         }
+    }
+    
+    /**
+     * Determines where the General for a certain color is
+     * @param isRed which General to find
+     * @return a square
+     */
+    public String getGeneralPos(boolean isRed) {
+        return generalPos.get(isRed);
+    }
+    
+    /**
+     * Notifies this that the board has been clicked on a square
+     * @param square where the board has been clicked
+     */
+    public void clicked(String square) {
+        if(selected == null) {
+            if(!isEmptySquare(square) && (getPiece(square).isRed == playerIsRed) && 
+                    ((playerIsRed && manipulable == 0) || (!playerIsRed && manipulable == 1) || manipulable == 2)) {
+                selected = square;
+            }
+        } else if(selected.equals(square)) {
+            selected = null;
+        } else {
+            if(!isEmptySquare(square)) {
+                if(getPiece(selected).isLegalMove(this, selected, square)) {
+                    movePiece(selected, square);
+                    selected = null;
+                } else {
+                    if(getPiece(square).isRed == playerIsRed) {
+                        selected = square;
+                    } else {
+                        selected = null;
+                    }
+                }
+            } else {
+                if(getPiece(selected).isLegalMove(this, selected, square)) {
+                    movePiece(selected, square);
+                    selected = null;
+                } else selected = null;
+            }
+        }
+        System.out.println("selected: " + selected);
+    }
+    
+    /**
+     * Enables dragging.
+     * @param fromWhere from where the piece is being dragged 
+     */
+    public void enableDragging(String fromWhere) {
+        if(!isEmptySquare(fromWhere)) 
+            if(getPiece(fromWhere).isRed == playerIsRed && 
+                    ((playerIsRed && manipulable == 0) || 
+                    (!playerIsRed && manipulable == 1) || manipulable == 2)) 
+                draggingFrom = fromWhere;
+            else 
+                fakeDraggingFrom = fromWhere;
+        System.out.println("selected: " + selected);
+    }
+    
+    /**
+     * Disables dragging.
+     * @param toWhere to where the piece is being dragged 
+     */
+    public void disableDragging(String toWhere) {
+        if(fakeDraggingFrom != null) {
+            fakeDraggingFrom = null;
+            return;
+        }
+        if(draggingFrom == null) return;
+        System.out.println("(" + lastPoint.x + ", " + lastPoint.y + ")");
+        System.out.println(draggingFrom + " -> " + toWhere);
+        /*if(getPiece(draggingFrom).isLegalMove(this, draggingFrom, dropSquare)) {
+            movePiece(draggingFrom, dropSquare);
+        }*/
+        if(getPiece(draggingFrom).isLegalMove(this, draggingFrom, toWhere)) {
+            movePiece(draggingFrom, toWhere);
+        }
+        if(!draggingFrom.equals(selected)) selected = null;
+        draggingFrom = null;
+    }
+    
+    /**
+     * Determines the square being referenced from a position
+     * @param xPos the x-position of the mouse
+     * @param yPos the y-position of the mouse
+     * @return a square
+     */
+    public String toSquareFromPos(int xPos, int yPos) {
+        int x1 = (xPos - x)/SQUARE_SIZE, y1 = (yPos - y)/SQUARE_SIZE;
+        return toPerspectiveSquare(x1, y1);
+    }
+    
+    /**
+     * Determines the square being referenced in perspective
+     * @param x the x position of the square
+     * @param y the y position of the square
+     * @return the square being referenced in perspective
+     */
+    public String toPerspectiveSquare(int x, int y) {
+        String output = (fromPerspective) ? toSquare(x, y) : rotateSquare180(x, y);
+        return (isValidSquare(output))? output : null;
+    }
+    
+    /**
+     * Rotates a square 180 degrees.
+     * @param s the square to rotate
+     * @return the resulting square
+     */
+    public String rotateSquare180(String s) {
+        return rotateSquare180(getColumn(s), getRow(s));
+    }
+    
+    /**
+     * Rotates a square 180 degrees.
+     * @param x the x position of the square to rotate
+     * @param y the y position of the square to rotate
+     * @return the resulting square
+     */
+    public String rotateSquare180(int x, int y) {
+        String output = toSquare(7-x, 7-y);
+        return (isValidSquare(output))? output : null;
     }
 
     /**

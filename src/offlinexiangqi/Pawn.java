@@ -22,12 +22,28 @@ public class Pawn extends AbstractPiece {
 
     @Override
     public LinkedList<String> allLegalMoves(XiangqiBoard xb, String currentPosition) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if(!XiangqiBoard.isValidSquare(currentPosition)) throw new IllegalArgumentException("Invalid square");
+        if(!(xb.getPiece(currentPosition).getCharRepresentation().equals("P"))) throw new IllegalArgumentException("This isn\'t a pawn!");
+        LinkedList<String> output = new LinkedList<>();
+        try {
+            String forward = (isRed)
+                    ? XiangqiBoard.shiftSquare(currentPosition, 0, -1)
+                    : XiangqiBoard.shiftSquare(currentPosition, 0, 1);
+            output.add(forward);
+        } catch (IllegalArgumentException iae) {
+        }
+        if(!XiangqiBoard.behindRiver(currentPosition, isRed)) {
+            if(XiangqiBoard.isValidShift(currentPosition, 1, 0))
+                output.add(XiangqiBoard.shiftSquare(currentPosition, 1, 0));
+            if(XiangqiBoard.isValidShift(currentPosition, -1, 0))
+                output.add(XiangqiBoard.shiftSquare(currentPosition, -1, 0));
+        }
+        return output;
     }
 
     @Override
     public LinkedList<String> legalCaptures(XiangqiBoard xb, String currentPosition) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return allLegalMoves(xb, currentPosition);
     }
 
     @Override

@@ -22,12 +22,40 @@ public class Advisor extends AbstractPiece {
 
     @Override
     public LinkedList<String> allLegalMoves(XiangqiBoard xb, String currentPosition) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if(!XiangqiBoard.isValidSquare(currentPosition)) throw new IllegalArgumentException("Invalid square");
+        if(!(xb.getPiece(currentPosition).getCharRepresentation().equals("A"))) throw new IllegalArgumentException("This isn\'t an advisor!");
+        LinkedList<String> output = new LinkedList<>();
+        String shift;
+        if(XiangqiBoard.isValidShift(currentPosition, -1, -1)) {
+            shift = XiangqiBoard.shiftSquare(currentPosition, -1, -1);
+            if(XiangqiBoard.insideFortress(shift, isRed)) {
+                output.add(shift);
+            }
+        }
+        if(XiangqiBoard.isValidShift(currentPosition, 1, 1)) {
+            shift = XiangqiBoard.shiftSquare(currentPosition, 1, 1);
+            if(XiangqiBoard.insideFortress(shift, isRed)) {
+                output.add(shift);
+            }
+        }
+        if(XiangqiBoard.isValidShift(currentPosition, 1, -1)) {
+            shift = XiangqiBoard.shiftSquare(currentPosition, 1, -1);
+            if(XiangqiBoard.insideFortress(shift, isRed)) {
+                output.add(shift);
+            }
+        }
+        if(XiangqiBoard.isValidShift(currentPosition, -1, 1)) {
+            shift = XiangqiBoard.shiftSquare(currentPosition, -1, 1);
+            if(XiangqiBoard.insideFortress(shift, isRed)) {
+                output.add(shift);
+            }
+        }
+        return output;
     }
 
     @Override
     public LinkedList<String> legalCaptures(XiangqiBoard xb, String currentPosition) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return allLegalMoves(xb, currentPosition);
     }
 
     @Override

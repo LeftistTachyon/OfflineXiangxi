@@ -22,12 +22,80 @@ public class Chariot extends AbstractPiece {
 
     @Override
     public LinkedList<String> allLegalMoves(XiangqiBoard xb, String currentPosition) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if(!XiangqiBoard.isValidSquare(currentPosition)) throw new IllegalArgumentException("Invalid square");
+        if(!(xb.getPiece(currentPosition).getCharRepresentation().equals("R"))) throw new IllegalArgumentException("This isn\'t a chariot!");
+        LinkedList<String> output = new LinkedList<>();
+        String temp;
+        if(XiangqiBoard.isValidShift(currentPosition, 1, 0)) {
+            temp = XiangqiBoard.shiftSquare(currentPosition, 1, 0);
+            while(xb.isEmptySquare(temp)) {
+                output.add(temp);
+                try {
+                    temp = XiangqiBoard.shiftSquare(temp, 1, 0);
+                } catch(IllegalArgumentException iae) {
+                    break;
+                }
+            }
+            if(XiangqiBoard.isValidSquare(temp) && !xb.isEmptySquare(temp)) {
+                if(xb.getPiece(temp).isRed ^ isRed) {
+                    output.add(temp);
+                }
+            }
+        }
+        if(XiangqiBoard.isValidShift(currentPosition, -1, 0)) {
+            temp = XiangqiBoard.shiftSquare(currentPosition, -1, 0);
+            while(xb.isEmptySquare(temp)) {
+                output.add(temp);
+                try {
+                    temp = XiangqiBoard.shiftSquare(temp, -1, 0);
+                } catch(IllegalArgumentException iae) {
+                    break;
+                }
+            }
+            if(XiangqiBoard.isValidSquare(temp) && !xb.isEmptySquare(temp)) {
+                if(xb.getPiece(temp).isRed ^ isRed) {
+                    output.add(temp);
+                }
+            }
+        }
+        if(XiangqiBoard.isValidShift(currentPosition, 0, 1)) {
+            temp = XiangqiBoard.shiftSquare(currentPosition, 0, 1);
+            while(xb.isEmptySquare(temp)) {
+                output.add(temp);
+                try {
+                    temp = XiangqiBoard.shiftSquare(temp, 0, 1);
+                } catch(IllegalArgumentException iae) {
+                    break;
+                }
+            }
+            if(XiangqiBoard.isValidSquare(temp) && !xb.isEmptySquare(temp)) {
+                if(xb.getPiece(temp).isRed ^ isRed) {
+                    output.add(temp);
+                }
+            }
+        }
+        if(XiangqiBoard.isValidShift(currentPosition, 0, -1)) {
+            temp = XiangqiBoard.shiftSquare(currentPosition, 0, -1);
+            while(xb.isEmptySquare(temp)) {
+                output.add(temp);
+                try {
+                    temp = XiangqiBoard.shiftSquare(temp, 0, -1);
+                } catch(IllegalArgumentException iae) {
+                    break;
+                }
+            }
+            if(XiangqiBoard.isValidSquare(temp) && !xb.isEmptySquare(temp)) {
+                if(xb.getPiece(temp).isRed ^ isRed) {
+                    output.add(temp);
+                }
+            }
+        }
+        return output;
     }
 
     @Override
     public LinkedList<String> legalCaptures(XiangqiBoard xb, String currentPosition) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return allLegalMoves(xb, currentPosition);
     }
 
     @Override
