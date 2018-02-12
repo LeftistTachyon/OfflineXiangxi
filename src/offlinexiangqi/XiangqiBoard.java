@@ -194,9 +194,9 @@ public class XiangqiBoard {
      * @param g2D Graphics2D to draw on
      */
     private void drawLines(Graphics2D g2D) {
-        g2D.setColor(new Color(205, 92, 2));
+        g2D.setColor(new Color(181, 136, 99));
         g2D.fillRect(x, y, 9*SQUARE_SIZE, 10*SQUARE_SIZE);
-        g2D.setColor(new Color(252, 173, 64));
+        g2D.setColor(new Color(240, 217, 181));
         g2D.fillRect(x + SQUARE_SIZE / 2, y + SQUARE_SIZE / 2, 
                 8*SQUARE_SIZE, 9*SQUARE_SIZE);
         g2D.setColor(Color.BLACK);
@@ -294,7 +294,7 @@ public class XiangqiBoard {
         } else selection = draggingFrom;
         LinkedList<String> moves = allLegalMoves.get(selection);
         if(moves == null) return;
-        Color moveDest = new Color(0, 78, 255, 77);
+        Color moveDest = new Color(20, 85, 30, 77);
         g2D.setColor(moveDest);
         final Point p = XiangqiPanel.getMouseCoordinates();
         //System.out.println((p == null)?"null":"(" + p.x + ", " + p.y + ")");
@@ -339,7 +339,7 @@ public class XiangqiBoard {
                         new int[]{four.y, four.y-TRIANGLE_SIZE, four.y}, 3); // 4
             }
         }
-        Color selectionColor = new Color(0, 78, 255, 128);
+        Color selectionColor = new Color(20, 85, 30, 128);
         g2D.setColor(selectionColor);
         if(fromPerspective) {
             g2D.fillRoundRect(x+XiangqiBoard.getColumn(selection)*SQUARE_SIZE, 
