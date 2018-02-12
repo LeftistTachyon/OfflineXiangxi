@@ -3,4 +3,5 @@ An offline version of Xiangxi. Going to be used to create an AI.
 
 ## TODO  
  - [x] Initial logic  
- - [ ] Add javadoc  
+ - [x] Add javadoc  
+ - [ ] Add AI
