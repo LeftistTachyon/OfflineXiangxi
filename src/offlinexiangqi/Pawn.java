@@ -29,14 +29,28 @@ public class Pawn extends AbstractPiece {
             String forward = (isRed)
                     ? XiangqiBoard.shiftSquare(currentPosition, 0, -1)
                     : XiangqiBoard.shiftSquare(currentPosition, 0, 1);
-            output.add(forward);
+            if(xb.isEmptySquare(forward))
+                output.add(forward);
+            else if(xb.getPiece(forward).isRed ^ isRed)
+                output.add(forward);
         } catch (IllegalArgumentException iae) {
         }
         if(!XiangqiBoard.behindRiver(currentPosition, isRed)) {
-            if(XiangqiBoard.isValidShift(currentPosition, 1, 0))
-                output.add(XiangqiBoard.shiftSquare(currentPosition, 1, 0));
-            if(XiangqiBoard.isValidShift(currentPosition, -1, 0))
-                output.add(XiangqiBoard.shiftSquare(currentPosition, -1, 0));
+            String temp;
+            if(XiangqiBoard.isValidShift(currentPosition, 1, 0)) {
+                temp = XiangqiBoard.shiftSquare(currentPosition, 1, 0);
+                if(xb.isEmptySquare(temp))
+                    output.add(temp);
+                else if(xb.getPiece(temp).isRed ^ isRed)
+                    output.add(temp);
+            }
+            if(XiangqiBoard.isValidShift(currentPosition, -1, 0)) {
+                temp = XiangqiBoard.shiftSquare(currentPosition, -1, 0);
+                if(xb.isEmptySquare(temp))
+                    output.add(temp);
+                else if(xb.getPiece(temp).isRed ^ isRed)
+                    output.add(temp);
+            }
         }
         return output;
     }

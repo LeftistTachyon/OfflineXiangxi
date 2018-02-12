@@ -29,25 +29,37 @@ public class Advisor extends AbstractPiece {
         if(XiangqiBoard.isValidShift(currentPosition, -1, -1)) {
             shift = XiangqiBoard.shiftSquare(currentPosition, -1, -1);
             if(XiangqiBoard.insideFortress(shift, isRed)) {
-                output.add(shift);
+                if(xb.isEmptySquare(shift))
+                    output.add(shift);
+                else if(xb.getPiece(shift).isRed ^ isRed)
+                    output.add(shift);
             }
         }
         if(XiangqiBoard.isValidShift(currentPosition, 1, 1)) {
             shift = XiangqiBoard.shiftSquare(currentPosition, 1, 1);
             if(XiangqiBoard.insideFortress(shift, isRed)) {
-                output.add(shift);
+                if(xb.isEmptySquare(shift))
+                    output.add(shift);
+                else if(xb.getPiece(shift).isRed ^ isRed)
+                    output.add(shift);
             }
         }
         if(XiangqiBoard.isValidShift(currentPosition, 1, -1)) {
             shift = XiangqiBoard.shiftSquare(currentPosition, 1, -1);
             if(XiangqiBoard.insideFortress(shift, isRed)) {
-                output.add(shift);
+                if(xb.isEmptySquare(shift))
+                    output.add(shift);
+                else if(xb.getPiece(shift).isRed ^ isRed)
+                    output.add(shift);
             }
         }
         if(XiangqiBoard.isValidShift(currentPosition, -1, 1)) {
             shift = XiangqiBoard.shiftSquare(currentPosition, -1, 1);
             if(XiangqiBoard.insideFortress(shift, isRed)) {
-                output.add(shift);
+                if(xb.isEmptySquare(shift))
+                    output.add(shift);
+                else if(xb.getPiece(shift).isRed ^ isRed)
+                    output.add(shift);
             }
         }
         return output;

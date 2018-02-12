@@ -29,25 +29,37 @@ public class Elephant extends AbstractPiece {
         if(XiangqiBoard.isValidShift(currentPosition, -2, -2)) {
             shift = XiangqiBoard.shiftSquare(currentPosition, -2, -2);
             if(xb.isEmptySquare(XiangqiBoard.shiftSquare(currentPosition, -1, -1)) && XiangqiBoard.behindRiver(shift, isRed)) {
-                output.add(shift);
+                if(xb.isEmptySquare(shift))
+                    output.add(shift);
+                else if(xb.getPiece(shift).isRed ^ isRed)
+                    output.add(shift);
             }
         }
         if(XiangqiBoard.isValidShift(currentPosition, 2, -2)) {
             shift = XiangqiBoard.shiftSquare(currentPosition, 2, -2);
             if(xb.isEmptySquare(XiangqiBoard.shiftSquare(currentPosition, 1, -1)) && XiangqiBoard.behindRiver(shift, isRed)) {
-                output.add(shift);
+                if(xb.isEmptySquare(shift))
+                    output.add(shift);
+                else if(xb.getPiece(shift).isRed ^ isRed)
+                    output.add(shift);
             }
         }
         if(XiangqiBoard.isValidShift(currentPosition, -2, 2)) {
             shift = XiangqiBoard.shiftSquare(currentPosition, -2, 2);
             if(xb.isEmptySquare(XiangqiBoard.shiftSquare(currentPosition, -1, 1)) && XiangqiBoard.behindRiver(shift, isRed)) {
-                output.add(shift);
+                if(xb.isEmptySquare(shift))
+                    output.add(shift);
+                else if(xb.getPiece(shift).isRed ^ isRed)
+                    output.add(shift);
             }
         }
         if(XiangqiBoard.isValidShift(currentPosition, 2, 2)) {
             shift = XiangqiBoard.shiftSquare(currentPosition, 2, 2);
             if(xb.isEmptySquare(XiangqiBoard.shiftSquare(currentPosition, 1, 1)) && XiangqiBoard.behindRiver(shift, isRed)) {
-                output.add(shift);
+                if(xb.isEmptySquare(shift))
+                    output.add(shift);
+                else if(xb.getPiece(shift).isRed ^ isRed)
+                    output.add(shift);
             }
         }
         return output;

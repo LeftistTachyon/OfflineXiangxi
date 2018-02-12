@@ -1,7 +1,7 @@
 package offlinexiangqi;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -67,11 +67,11 @@ public class XiangqiBoard {
     
     /**
      * Which side this player can move pieces for.<br>
-     * 0 == WHITE<br>
+     * 0 == RED<br>
      * 1 == BLACK<br>
      * 2 == BOTH
      */
-    private int manipulable = 1;
+    private int manipulable = 2;
     
     /**
      * The selected square
@@ -182,7 +182,7 @@ public class XiangqiBoard {
         Graphics2D g2D = (Graphics2D) g;
         g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
-        drawCheckers(g2D);
+        drawLines(g2D);
         drawCheck(g2D);
         drawSelection(g2D);
         drawPieces(g2D);
@@ -193,20 +193,39 @@ public class XiangqiBoard {
      * Draws the checkered pattern
      * @param g2D Graphics2D to draw on
      */
-    private void drawCheckers(Graphics2D g2D) {
-        g2D.setColor(new Color(181, 136, 99));
+    private void drawLines(Graphics2D g2D) {
+        g2D.setColor(new Color(205, 92, 2));
         g2D.fillRect(x, y, 9*SQUARE_SIZE, 10*SQUARE_SIZE);
-        g2D.setColor(new Color(240, 217, 181));
-        for(int i = x;i<9*SQUARE_SIZE+x;i+=SQUARE_SIZE*2) {
-            for(int j = y;j<10*SQUARE_SIZE+y;j+=SQUARE_SIZE*2) {
-                g2D.fillRect(i, j, SQUARE_SIZE, SQUARE_SIZE);
-            }
+        g2D.setColor(new Color(252, 173, 64));
+        g2D.fillRect(x + SQUARE_SIZE / 2, y + SQUARE_SIZE / 2, 
+                8*SQUARE_SIZE, 9*SQUARE_SIZE);
+        g2D.setColor(Color.BLACK);
+        g2D.setStroke(new BasicStroke(4, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+        g2D.drawRect(SQUARE_SIZE/2 - 5 + x, SQUARE_SIZE/2 - 5 + y, 8*SQUARE_SIZE + 10, 9*SQUARE_SIZE + 10);
+        g2D.setStroke(new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+        g2D.drawRect(SQUARE_SIZE/2 + x, SQUARE_SIZE/2 + y, 8*SQUARE_SIZE, 9*SQUARE_SIZE);
+        g2D.drawLine(SQUARE_SIZE/2 + x, SQUARE_SIZE/2 + SQUARE_SIZE*4 + y, 
+                SQUARE_SIZE/2 + SQUARE_SIZE*8 + x, SQUARE_SIZE/2 + SQUARE_SIZE*4 + y);
+        g2D.drawLine(SQUARE_SIZE/2 + x, SQUARE_SIZE/2 + SQUARE_SIZE*5 + y, 
+                SQUARE_SIZE/2 + SQUARE_SIZE*8 + x, SQUARE_SIZE/2 + SQUARE_SIZE*5 + y);
+        g2D.setStroke(new BasicStroke(0.75f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+        for(int i = 1; i < 8; i++) {
+            g2D.drawLine(SQUARE_SIZE/2 + SQUARE_SIZE * i, SQUARE_SIZE/2, 
+                    SQUARE_SIZE/2 + SQUARE_SIZE * i, SQUARE_SIZE/2 + SQUARE_SIZE*4);
+            g2D.drawLine(SQUARE_SIZE/2 + SQUARE_SIZE * i, SQUARE_SIZE/2 + SQUARE_SIZE*5, 
+                    SQUARE_SIZE/2 + SQUARE_SIZE * i, SQUARE_SIZE/2 + SQUARE_SIZE*9);
         }
-        for(int i = x+SQUARE_SIZE;i<9*SQUARE_SIZE+x;i+=SQUARE_SIZE*2) {
-            for(int j = y+SQUARE_SIZE;j<10*SQUARE_SIZE+y;j+=SQUARE_SIZE*2) {
-                g2D.fillRect(i, j, SQUARE_SIZE, SQUARE_SIZE);
-            }
+        for(int i = 1; i < 4; i++) {
+            g2D.drawLine(SQUARE_SIZE/2, SQUARE_SIZE/2 + SQUARE_SIZE*i, 
+                    SQUARE_SIZE/2 + SQUARE_SIZE*8, SQUARE_SIZE/2 + SQUARE_SIZE*i);
         }
+        for(int i = 5; i < 9; i++) {
+            g2D.drawLine(SQUARE_SIZE/2, SQUARE_SIZE/2 + SQUARE_SIZE*i, 
+                    SQUARE_SIZE/2 + SQUARE_SIZE*8, SQUARE_SIZE/2 + SQUARE_SIZE*i);
+        }
+        g2D.drawLine(SQUARE_SIZE/2 + SQUARE_SIZE*3, SQUARE_SIZE/2, SQUARE_SIZE/2 + SQUARE_SIZE*5, SQUARE_SIZE/2 + SQUARE_SIZE*2);
+        g2D.drawLine(SQUARE_SIZE/2 + SQUARE_SIZE*3, SQUARE_SIZE/2 + SQUARE_SIZE*2, SQUARE_SIZE/2 + SQUARE_SIZE*5, SQUARE_SIZE/2);
+        
         g2D.setColor(new Color(155, 199, 0, 105));
         if(lastMoveFrom != null) {
             if(fromPerspective) {
@@ -229,32 +248,6 @@ public class XiangqiBoard {
                         (9-getRow(lastMoveTo))*SQUARE_SIZE+y, 
                         SQUARE_SIZE, SQUARE_SIZE);
             }
-        }
-        
-        g2D.setPaint(Color.BLACK);
-        g2D.setFont(new Font("Century Gothic", 0, 12)); // NOI18N
-        if(fromPerspective) {
-            int i = 0;
-            for (; i < 9; i++) {
-                g2D.drawString((char) ('a' + i) + "",
-                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) - 3 + x, 
-                        SQUARE_SIZE * 10 + 12 + y);
-                g2D.drawString((10 - i) + "", SQUARE_SIZE * 9 + 3 + x,
-                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6 + y);
-            }
-            g2D.drawString((10 - i) + "", SQUARE_SIZE * 9 + 3 + x,
-                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6 + y);
-        } else {
-            int i = 0;
-            for (; i < 9; i++) {
-                g2D.drawString((char) ('a' + 9 - i) + "",
-                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) - 3 + x, 
-                        SQUARE_SIZE * 10 + 12 + y);
-                g2D.drawString((i + 1) + "", SQUARE_SIZE * 9 + 3 + x,
-                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6 + y);
-            }
-            g2D.drawString((i + 1) + "", SQUARE_SIZE * 9 + 3 + x,
-                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6 + y);
         }
     }
     
@@ -301,7 +294,7 @@ public class XiangqiBoard {
         } else selection = draggingFrom;
         LinkedList<String> moves = allLegalMoves.get(selection);
         if(moves == null) return;
-        Color moveDest = new Color(20, 85, 30, 77);
+        Color moveDest = new Color(0, 78, 255, 77);
         g2D.setColor(moveDest);
         final Point p = XiangqiPanel.getMouseCoordinates();
         //System.out.println((p == null)?"null":"(" + p.x + ", " + p.y + ")");
@@ -318,7 +311,8 @@ public class XiangqiBoard {
                 if(isEmptySquare(x1, y1) && 
                         (p.x >= x+x2*SQUARE_SIZE && p.x <= x+x2*SQUARE_SIZE+SQUARE_SIZE) && 
                         (p.y >= y+y2*SQUARE_SIZE && p.y <= y+y2*SQUARE_SIZE+SQUARE_SIZE)) {
-                    g2D.fillRect(x+x2*SQUARE_SIZE, y+y2*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+                    g2D.fillRoundRect(x+x2*SQUARE_SIZE, 
+                            y+y2*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, 16, 16);
                     continue;
                 }
             }
@@ -345,14 +339,14 @@ public class XiangqiBoard {
                         new int[]{four.y, four.y-TRIANGLE_SIZE, four.y}, 3); // 4
             }
         }
-        Color selectionColor = new Color(20, 85, 30, 128);
+        Color selectionColor = new Color(0, 78, 255, 128);
         g2D.setColor(selectionColor);
         if(fromPerspective) {
-            g2D.fillRect(x+XiangqiBoard.getColumn(selection)*SQUARE_SIZE, 
-                    y+XiangqiBoard.getRow(selection)*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+            g2D.fillRoundRect(x+XiangqiBoard.getColumn(selection)*SQUARE_SIZE, 
+                    y+XiangqiBoard.getRow(selection)*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, 16, 16);
         } else {
-            g2D.fillRect(x+(7-XiangqiBoard.getColumn(selection))*SQUARE_SIZE, 
-                    y+(7-XiangqiBoard.getRow(selection))*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+            g2D.fillRoundRect(x+(9-XiangqiBoard.getColumn(selection))*SQUARE_SIZE, 
+                    y+(9-XiangqiBoard.getRow(selection))*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, 16, 16);
         }
     }
     
@@ -377,16 +371,11 @@ public class XiangqiBoard {
                     new RadialGradientPaint(
                             (SQUARE_SIZE/2) + (col*SQUARE_SIZE) + x, 
                             (SQUARE_SIZE/2) + (row*SQUARE_SIZE) + y, 
-                            SQUARE_SIZE*7/12, fractions, colors
+                            SQUARE_SIZE*3/4, fractions, colors
                     )
             );
-            g2D.fill(
-                    new Ellipse2D.Double(
-                            col*SQUARE_SIZE + x, 
-                            row*SQUARE_SIZE + y, 
-                            SQUARE_SIZE, SQUARE_SIZE
-                    )
-            );
+            g2D.fillRoundRect(col*SQUARE_SIZE + x, row*SQUARE_SIZE + y, 
+                    SQUARE_SIZE, SQUARE_SIZE, 16, 16);
         }
     }
     
@@ -766,9 +755,9 @@ public class XiangqiBoard {
     public static boolean behindRiver(String square, boolean isRed) {
         if(isValidSquare(square)) {
             if(isRed) {
-                return getRow(square) <= 4;
-            } else {
                 return getRow(square) >= 5;
+            } else {
+                return getRow(square) <= 4;
             }
         } else throw new IllegalArgumentException("Invalid square");
     }
@@ -845,6 +834,7 @@ public class XiangqiBoard {
             else 
                 fakeDraggingFrom = fromWhere;
         System.out.println("selected: " + selected);
+        System.out.println("draggingFrom: " + draggingFrom);
     }
     
     /**

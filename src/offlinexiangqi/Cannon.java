@@ -58,34 +58,53 @@ public class Cannon extends AbstractPiece {
                 }
             }
         }
-        if(XiangqiBoard.isValidShift(currentPosition, 0, 1)) {
-            temp = XiangqiBoard.shiftSquare(currentPosition, 0, 1);
-            while(xb.isEmptySquare(temp)) {
-                output.add(temp);
-                try {
-                    temp = XiangqiBoard.shiftSquare(temp, 0, 1);
-                } catch(IllegalArgumentException iae) {
-                    break;
-                }
-            }
-            if(XiangqiBoard.isValidSquare(temp) && !xb.isEmptySquare(temp)) {
-                if(xb.getPiece(temp).isRed ^ isRed) {
-                    output.add(temp);
-                }
-            }
-        }
-        if(XiangqiBoard.isValidShift(currentPosition, 0, -1)) {
-            temp = XiangqiBoard.shiftSquare(currentPosition, 0, -1);
-            while(xb.isEmptySquare(temp)) {
-                try {
-                    temp = XiangqiBoard.shiftSquare(temp, 0, -1);
-                } catch(IllegalArgumentException iae) {
-                    break;
-                }
-            }
-            if(XiangqiBoard.isValidShift(temp, 0, -1)) {
-                temp = XiangqiBoard.shiftSquare(temp, 0, -1);
+        if(isRed) {
+            if(XiangqiBoard.isValidShift(currentPosition, 0, 1)) {
+                temp = XiangqiBoard.shiftSquare(currentPosition, 0, 1);
                 while(xb.isEmptySquare(temp)) {
+                    output.add(temp);
+                    try {
+                        temp = XiangqiBoard.shiftSquare(temp, 0, 1);
+                    } catch(IllegalArgumentException iae) {
+                        break;
+                    }
+                }
+                if(XiangqiBoard.isValidSquare(temp) && !xb.isEmptySquare(temp)) {
+                    if(xb.getPiece(temp).isRed ^ isRed) {
+                        output.add(temp);
+                    }
+                }
+            }
+            if(XiangqiBoard.isValidShift(currentPosition, 0, -1)) {
+                temp = XiangqiBoard.shiftSquare(currentPosition, 0, -1);
+                while(xb.isEmptySquare(temp)) {
+                    try {
+                        temp = XiangqiBoard.shiftSquare(temp, 0, -1);
+                    } catch(IllegalArgumentException iae) {
+                        break;
+                    }
+                }
+                if(XiangqiBoard.isValidShift(temp, 0, -1)) {
+                    temp = XiangqiBoard.shiftSquare(temp, 0, -1);
+                    while(xb.isEmptySquare(temp)) {
+                        try {
+                            temp = XiangqiBoard.shiftSquare(temp, 0, -1);
+                        } catch(IllegalArgumentException iae) {
+                            break;
+                        }
+                    }
+                    if(XiangqiBoard.isValidSquare(temp) && !xb.isEmptySquare(temp)) {
+                        if(xb.getPiece(temp).isRed ^ isRed) {
+                            output.add(temp);
+                        }
+                    }
+                }
+            }
+        } else {
+            if(XiangqiBoard.isValidShift(currentPosition, 0, -1)) {
+                temp = XiangqiBoard.shiftSquare(currentPosition, 0, -1);
+                while(xb.isEmptySquare(temp)) {
+                    output.add(temp);
                     try {
                         temp = XiangqiBoard.shiftSquare(temp, 0, -1);
                     } catch(IllegalArgumentException iae) {
@@ -95,6 +114,31 @@ public class Cannon extends AbstractPiece {
                 if(XiangqiBoard.isValidSquare(temp) && !xb.isEmptySquare(temp)) {
                     if(xb.getPiece(temp).isRed ^ isRed) {
                         output.add(temp);
+                    }
+                }
+            }
+            if(XiangqiBoard.isValidShift(currentPosition, 0, 1)) {
+                temp = XiangqiBoard.shiftSquare(currentPosition, 0, 1);
+                while(xb.isEmptySquare(temp)) {
+                    try {
+                        temp = XiangqiBoard.shiftSquare(temp, 0, 1);
+                    } catch(IllegalArgumentException iae) {
+                        break;
+                    }
+                }
+                if(XiangqiBoard.isValidShift(temp, 0, 1)) {
+                    temp = XiangqiBoard.shiftSquare(temp, 0, 1);
+                    while(xb.isEmptySquare(temp)) {
+                        try {
+                            temp = XiangqiBoard.shiftSquare(temp, 0, 1);
+                        } catch(IllegalArgumentException iae) {
+                            break;
+                        }
+                    }
+                    if(XiangqiBoard.isValidSquare(temp) && !xb.isEmptySquare(temp)) {
+                        if(xb.getPiece(temp).isRed ^ isRed) {
+                            output.add(temp);
+                        }
                     }
                 }
             }
